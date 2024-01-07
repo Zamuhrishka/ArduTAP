@@ -2,7 +2,7 @@
 
 # ArduTAP: Simple Library for Working with JTAG TAP
 
-ArduTAP is an Arduino library designed to facilitate communication with devices using the JTAG protocol. It provides an intuitive and straightforward interface for interfacing with JTAG Test Access Ports (TAPs).
+ArduTAP is an Arduino library designed to facilitate communication with devices using the JTAG protocol and based on [ArduJTAG](https://github.com/Zamuhrishka/ArduJTAG) library. It provides an intuitive and straightforward interface for interfacing with JTAG Test Access Ports (TAPs).
 
 ## Features
 
@@ -34,21 +34,108 @@ lib_deps =
     https://github.com/Zamuhrishka/ArduTAP.git
 ```
 
+## Dependencies
+
+- [ArduJTAG](https://github.com/Zamuhrishka/ArduJTAG)
+
 ## Usage
 
-- Create object
+To demonstrate the use of this library, I will show how to interact with the STM32F407 microcontroller via the JTAG interface.
+This microcontroller contains 2 TAP modules connected in series: **BoundaryScan** and **Debug**:
+
+![STM32F407TAP](doc/img/STM32F407TAPs.png)
+
+The size of the `IR` register for the **BoundaryScan** TAP is `5` bits. For the **Debug** TAP, it is `4` bits.
+
+### Instruction structure
+
+For current library any JTAG instruction must be rerpresent by next structure:
 
 ```c
-TAP tap = TAP(TMS, TDI, TDO, TCK, RST);
+struct Instruction
+{
+  uint16_t code;    // Instruction code
+  uint16_t ir_len;  // Length of the instruction register
+  uint16_t dr_len;  // Length of the data register
+};
 ```
 
-- Call neccessory methods
+For example if you want to execute `IDCODE` instruction then you need create next variable:
 
 ```c
-tap.read(IDCODE, (uint8_t *)&id);
+Instruction_s IDCODE = {.code = 0x1FE, .ir_len = 9, .dr_len = 32};
 ```
 
-Also see [examples](./examples/).
+And use this variable as argument for TAP methods.
+
+
+### Read data from the TAP
+
+For reading data, the following function is used:
+
+```c
+/**
+   * \brief Read data from the device by applying the given instruction and
+   * storing the output
+   *
+   * \param instruction Instruction structure containing the code and lengths
+   * \param data Pointer to a buffer where the output data will be stored
+   */
+  void read(const Instruction_s &instruction, uint8_t *data);
+```
+
+The data array will be store readded bits from TAP. Format of this bits are same as for [ArduJTAG](https://github.com/Zamuhrishka/ArduJTAG), please see accordig paragraph of the ArduJTAG `README.md` file.
+
+### Write data to the TAP
+
+For writing data, the following function is used:
+
+```c
+/**
+   * \brief Write data to the device using the given instruction
+   *
+   * \param instruction Instruction structure containing the code and lengths
+   * \param data Pointer to the data to be written
+   */
+  void write(const Instruction_s &instruction, /*const*/ uint8_t *data);
+```
+
+The data array will be store bits for write to TAP. Format of this bits are same as for [ArduJTAG](https://github.com/Zamuhrishka/ArduJTAG), please see accordig paragraph of the ArduJTAG `README.md` file.
+
+### Execute instruction
+
+For executing, the following function is used:
+
+```c
+/**
+   * \brief Execute a JTAG operation given an instruction, input data, and an
+   * output buffer
+   *
+   * \param instruction Instruction structure containing the code and lengths
+   * \param input Pointer to the input data
+   * \param output Pointer to the buffer where the output data will be stored
+   */
+  void execute(const Instruction_s &instruction, /*const*/ uint8_t *input, uint8_t *output);
+```
+
+The main feature of this function is that it give possibility wtite data to the TAP and read data from the TAP in same moment.
+
+### Raw read
+
+If you need just read data from `DR` register without executing any instruction then you need use function:
+
+```c
+/**
+   * \brief Read raw data of specified length from the device
+   *
+   * \param input Pointer to the input data
+   * \param data Pointer to a buffer where the output data will be stored
+   * \param len Length of the data to read
+   */
+  void read_raw(uint8_t *input, uint8_t *data, uint16_t len);
+```
+
+More examples of using this library can be found in [examples](./examples/).
 
 ## Contributing
 
