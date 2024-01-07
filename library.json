@@ -1,6 +1,6 @@
 {
     "name": "ArduTAP",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "ArduTAP is an Arduino library designed to facilitate communication with devices using the JTAG protocol. It provides an intuitive and straightforward interface for interfacing with JTAG Test Access Ports (TAPs).",
     "keywords": "jtag, boundaryscan, tap",
     "repository":
