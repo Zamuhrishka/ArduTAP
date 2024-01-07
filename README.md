@@ -40,13 +40,6 @@ lib_deps =
 
 ## Usage
 
-To demonstrate the use of this library, I will show how to interact with the STM32F407 microcontroller via the JTAG interface.
-This microcontroller contains 2 TAP modules connected in series: **BoundaryScan** and **Debug**:
-
-![STM32F407TAP](doc/img/STM32F407TAPs.png)
-
-The size of the `IR` register for the **BoundaryScan** TAP is `5` bits. For the **Debug** TAP, it is `4` bits.
-
 ### Instruction structure
 
 For current library any JTAG instruction must be rerpresent by next structure:
